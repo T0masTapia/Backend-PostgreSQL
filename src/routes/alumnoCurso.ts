@@ -35,7 +35,9 @@ router.post("/matricular", async (req, res) => {
       [id_curso]
     );
     if (resultsCurso.rows.length === 0)
-      return res.status(400).json({ success: false, error: "Curso no encontrado" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Curso no encontrado" });
 
     const cursoInfo = resultsCurso.rows[0];
     const costoCurso = Number(cursoInfo.costo_curso);
@@ -65,11 +67,21 @@ router.post("/matricular", async (req, res) => {
     // 5️⃣ Insertar deuda
     const resultDeuda = await db.query(
       `INSERT INTO deuda 
-        (id_alumno_curso, monto, costo_matricula, costo_cursos, descripcion, fecha_deuda, fecha_limite, estado)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [id_alumno_curso, montoTotal, montoMatriculaAPagar, montoCursos, descripcion, fechaDeuda, fechaLimite, estado]
+    (id_alumno_curso, monto, costo_matricula, costo_cursos, descripcion, fecha_deuda, fecha_limite, estado)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_deuda`,
+      [
+        id_alumno_curso,
+        montoTotal,
+        montoMatriculaAPagar,
+        montoCursos,
+        descripcion,
+        fechaDeuda,
+        fechaLimite,
+        estado,
+      ]
     );
-    const id_deuda = resultDeuda.rows[0].id;
+
+    const id_deuda = resultDeuda.rows[0].id_deuda;
 
     // 6️⃣ Obtener email y usuario
     const resultsEmail = await db.query(
@@ -112,7 +124,9 @@ router.post("/matricular", async (req, res) => {
     });
   } catch (error) {
     console.error("Error en /matricular:", error);
-    res.status(500).json({ success: false, error: "Error en la base de datos o servidor" });
+    res
+      .status(500)
+      .json({ success: false, error: "Error en la base de datos o servidor" });
   }
 });
 
@@ -123,7 +137,10 @@ router.put("/retirar/:id", async (req, res) => {
     const { estadoActual } = req.body;
     const nuevoEstado = estadoActual === "activo" ? "retirado" : "activo";
 
-    await db.query("UPDATE alumno_curso SET estado = $1 WHERE id = $2", [nuevoEstado, id]);
+    await db.query("UPDATE alumno_curso SET estado = $1 WHERE id = $2", [
+      nuevoEstado,
+      id,
+    ]);
 
     res.json({ success: true, message: `Alumno ${nuevoEstado}`, nuevoEstado });
   } catch (error) {
@@ -146,7 +163,9 @@ router.get("/", async (req, res) => {
     res.json({ success: true, matriculas: result.rows });
   } catch (error) {
     console.error("Error al obtener matrículas:", error);
-    res.status(500).json({ success: false, error: "Error en la base de datos" });
+    res
+      .status(500)
+      .json({ success: false, error: "Error en la base de datos" });
   }
 });
 
@@ -175,7 +194,9 @@ router.get("/cursos/:rut_alumno", async (req, res) => {
     res.json({ success: true, cursos: result.rows });
   } catch (error) {
     console.error("Error al obtener cursos del alumno:", error);
-    res.status(500).json({ success: false, error: "Error en la base de datos" });
+    res
+      .status(500)
+      .json({ success: false, error: "Error en la base de datos" });
   }
 });
 

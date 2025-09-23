@@ -24,9 +24,9 @@ router.get("/con-deuda", async (req, res) => {
         a.nombre_completo,
         u.correo,
         d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0) AS deudaMatricula,
-        d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0) AS deudaCursos,
+        d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'curso' THEN p.monto END), 0) AS deudaCursos,
         (d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0))
-        + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0)) AS deuda_total,
+        + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'curso' THEN p.monto END), 0)) AS deuda_total,
         c.nombre_curso AS cursoPendiente
       FROM deuda d
       JOIN alumno_curso ac ON d.id_alumno_curso = ac.id
@@ -37,7 +37,7 @@ router.get("/con-deuda", async (req, res) => {
       WHERE d.estado = 'pendiente'
       GROUP BY d.id_deuda, a.rut, a.nombre_completo, u.correo, d.costo_matricula, d.costo_cursos, c.nombre_curso
       HAVING (d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0))
-           + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0)) > 0
+           + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'curso' THEN p.monto END), 0)) > 0
   `;
 
   try {

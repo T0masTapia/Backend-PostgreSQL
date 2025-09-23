@@ -64,11 +64,18 @@ router.post("/matricular", async (req, res) => {
     fechaLimite.setDate(fechaLimite.getDate() + 8);
     fechaLimite.setHours(0, 0, 0, 0);
 
+    // Formatear fecha límite para el correo
+    const fechaLimiteFormateada = fechaLimite.toLocaleDateString("es-CL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
     // 5️⃣ Insertar deuda
     const resultDeuda = await db.query(
       `INSERT INTO deuda 
-    (id_alumno_curso, monto, costo_matricula, costo_cursos, descripcion, fecha_deuda, fecha_limite, estado)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_deuda`,
+       (id_alumno_curso, monto, costo_matricula, costo_cursos, descripcion, fecha_deuda, fecha_limite, estado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_deuda`,
       [
         id_alumno_curso,
         montoTotal,
@@ -80,7 +87,6 @@ router.post("/matricular", async (req, res) => {
         estado,
       ]
     );
-
     const id_deuda = resultDeuda.rows[0].id_deuda;
 
     // 6️⃣ Obtener email y usuario
@@ -108,10 +114,55 @@ router.post("/matricular", async (req, res) => {
 
       const enlace = `http://localhost:5173/enlace-password?token=${token}`;
 
+      // Enviar correo
       await enviarCorreo(
         alumnoCorreo,
         `Matrícula y Detalles del Curso ${nombreCurso} - AulaConnect Educa`,
-        `<div> ... contenido HTML similar ... </div>`
+        `
+        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: #fdfdfd; color: #333;">
+          <h2 style="color: #0056b3; text-align: center; margin-bottom: 10px;">Confirmación de Matrícula</h2>
+          <p style="font-size: 15px;">Estimado/a <strong>${alumnoNombre}</strong>,</p>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Nos complace informarle que su inscripción en el curso de 
+            <strong style="color:#0056b3;">${nombreCurso}</strong> ha sido confirmada exitosamente.
+          </p>
+          <h3 style="margin-top: 20px; color: #444;">📌 Información del Curso</h3>
+          <ul style="font-size: 15px; line-height: 1.6;">
+            <li><strong>Duración:</strong> ${duracionCurso} horas</li>
+            <li><strong>Fecha de inicio:</strong> Por Determinar</li>
+            <li><strong>Fecha de término:</strong> Por Determinar</li>
+            <li><strong>Modalidad:</strong> En línea en <a href="https://cfaeduca.cl/aula-virtual/" style="color:#0056b3;">CFA</a></li>
+          </ul>
+          <h3 style="margin-top: 20px; color: #444;">💳 Información de Pago</h3>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Monto pendiente: <strong>$${montoTotal.toLocaleString()}</strong><br>
+            Fecha límite de pago: <strong>${fechaLimiteFormateada}</strong>
+          </p>
+          <h3 style="margin-top: 20px; color: #444;">🔑 Detalles de Acceso</h3>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Su usuario será su <strong>Correo Electrónico Personal</strong>.<br>
+            Ejemplo: si su correo es <strong>correo@gmail.com</strong>, su usuario será <strong>correo@gmail.com</strong>.
+          </p>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Antes de ingresar por primera vez, debe crear su contraseña personal en el siguiente enlace:
+          </p>
+          <p style="text-align: center; margin: 20px 0;">
+            <a href="${enlace}" 
+              style="display: inline-block; padding: 12px 24px; background-color: #0056b3; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Crear mi contraseña
+            </a>
+          </p>
+          <p style="font-size: 14px; color: #888;">
+            Este enlace es válido por <strong>1 hora</strong>.
+          </p>
+          <p style="font-size: 15px; line-height: 1.6; margin-top: 20px;">
+            ¡Le deseamos mucho éxito en su curso! 🚀
+          </p>
+          <p style="text-align: center; font-size: 14px; color: #777; margin-top: 30px;">
+            Atentamente,<br><strong>AulaConnect Educa</strong>
+          </p>
+        </div>
+        `
       );
     }
 
@@ -124,9 +175,10 @@ router.post("/matricular", async (req, res) => {
     });
   } catch (error) {
     console.error("Error en /matricular:", error);
-    res
-      .status(500)
-      .json({ success: false, error: "Error en la base de datos o servidor" });
+    res.status(500).json({
+      success: false,
+      error: "Error en la base de datos o servidor",
+    });
   }
 });
 

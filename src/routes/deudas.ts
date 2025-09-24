@@ -18,33 +18,26 @@ router.get("/", async (req, res) => {
 // Obtener alumnos con deuda pendiente
 router.get("/con-deuda", async (req, res) => {
   const sql = `
-    WITH pagos_agg AS (
-      SELECT
-        id_deuda,
-        SUM(CASE WHEN concepto_pago = 'matricula' THEN monto ELSE 0 END) AS pagado_matricula,
-        SUM(CASE WHEN concepto_pago = 'curso' THEN monto ELSE 0 END) AS pagado_curso
-      FROM pago
-      GROUP BY id_deuda
-    )
     SELECT 
-      d.id_deuda,
-      a.rut,
-      a.nombre_completo,
-      u.correo,
-      d.costo_matricula - COALESCE(p.pagado_matricula,0) AS deudaMatricula,
-      d.costo_cursos - COALESCE(p.pagado_curso,0) AS deudaCursos,
-      (d.costo_matricula - COALESCE(p.pagado_matricula,0)) + 
-      (d.costo_cursos - COALESCE(p.pagado_curso,0)) AS deuda_total,
-      c.nombre_curso AS cursoPendiente
+        d.id_deuda,
+        a.rut,
+        a.nombre_completo,
+        u.correo,
+        d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0) AS deudaMatricula,
+        d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0) AS deudaCursos,
+        (d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0))
+        + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0)) AS deuda_total,
+        c.nombre_curso AS cursoPendiente
     FROM deuda d
     JOIN alumno_curso ac ON d.id_alumno_curso = ac.id
     JOIN alumno a ON ac.rut_alumno = a.rut
     JOIN usuario u ON u.id_usuario = a.id_usuario
     JOIN curso c ON ac.id_curso = c.id_curso
-    LEFT JOIN pagos_agg p ON p.id_deuda = d.id_deuda
+    LEFT JOIN pago p ON p.id_deuda = d.id_deuda
     WHERE d.estado = 'pendiente'
-      AND ((d.costo_matricula - COALESCE(p.pagado_matricula,0)) + 
-           (d.costo_cursos - COALESCE(p.pagado_curso,0)) > 0)
+    GROUP BY d.id_deuda, a.rut, a.nombre_completo, u.correo, d.costo_matricula, d.costo_cursos, c.nombre_curso
+    HAVING (d.costo_matricula - COALESCE(SUM(CASE WHEN p.concepto_pago = 'matricula' THEN p.monto END), 0))
+          + (d.costo_cursos - COALESCE(SUM(CASE WHEN p.concepto_pago = 'cursos' THEN p.monto END), 0)) > 0
     ORDER BY a.nombre_completo, c.nombre_curso
   `;
 

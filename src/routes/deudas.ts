@@ -15,7 +15,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Obtener alumnos con deuda pendiente
+
+// routes/deudas.ts
 router.get("/con-deuda", async (req, res) => {
   const sql = `
     SELECT 
@@ -43,12 +44,14 @@ router.get("/con-deuda", async (req, res) => {
 
   try {
     const result = await db.query(sql);
+    console.log("Deudas con detalle:", result.rows); // <-- aquí
     res.json({ success: true, alumnos: result.rows });
   } catch (err) {
     console.error("Error al obtener alumnos con deuda:", err);
     res.status(500).json({ success: false, error: "Error en la base de datos" });
   }
 });
+
 
 // Obtener total de deudas pendientes
 router.get("/total-pendientes", async (req, res) => {

@@ -31,7 +31,7 @@ app.use('/binlookup', binlookupRoutes);
 app.use('/becas', becasRoutes);
 app.use('/restablecer-password', restablecerPassRoutes);
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001; // usar puerto de Render si existe
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });

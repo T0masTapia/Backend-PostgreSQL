@@ -32,7 +32,7 @@ router.get("/con-deuda", async (req, res) => {
       a.nombre_completo,
       u.correo,
       d.costo_matricula - COALESCE(p.pagado_matricula,0) AS deudaMatricula,
-      d.costo_cursos - COALESCE(p.pagado_curso,0) AS deudaCurso,
+      d.costo_cursos - COALESCE(p.pagado_curso,0) AS deudaCursos,
       (d.costo_matricula - COALESCE(p.pagado_matricula,0)) + 
       (d.costo_cursos - COALESCE(p.pagado_curso,0)) AS deuda_total,
       c.nombre_curso AS cursoPendiente

@@ -1,32 +1,20 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', // o tu servidor SMTP
-  port: 465,
-  secure: true, // true para 465, false para 587
-  auth: {
-    user: 'contacto.aulaconnect@gmail.com', // tu correo
-    pass: 'styw lrma bjui fswf' // contraseña de app si usas 2FA
-  }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
-export const enviarCorreo = async (
-  para: string,
-  asunto: string,
-  mensaje: string,
-  attachments?: { filename: string; content: Buffer; contentType?: string }[]
-) => {
+export const enviarCorreo = async (para: string, asunto: string, mensaje: string) => {
   try {
-    const info = await transporter.sendMail({
-      from: '"AulaConnect" <contacto.aulaconnect@gmail.com>',
+    const msg = {
       to: para,
+      from: process.env.FROM_EMAIL!,
       subject: asunto,
       html: mensaje,
-      attachments 
-    });
-    console.log('Correo enviado:', info.messageId);
+    };
+    await sgMail.send(msg);
+    console.log('✅ Correo enviado a:', para);
   } catch (error) {
     console.error('Error enviando correo:', error);
   }
 };
-

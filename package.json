@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc && copyfiles -u 1 src/templates/**/* dist && copyfiles -u 1 src/assets/**/* dist",
+    "build": "tsc && copyfiles -u 1 assets/**/* dist && copyfiles -u 1 templates/**/* dist",
     "start": "node dist/index.js"
   },
   "keywords": [],

@@ -7,6 +7,7 @@ const router = express.Router();
 
 // POST /alumnoCurso/matricular
 router.post("/matricular", async (req, res) => {
+  console.log("📌 POST /alumnoCurso/matricular recibido con body:", req.body);
   try {
     const { rut_alumno, id_curso } = req.body;
     if (!rut_alumno || !id_curso)

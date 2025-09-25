@@ -51,15 +51,14 @@
         <table>
           <tr>
             <td><strong>Fecha emisión:</strong> {{fecha}}</td>
-            <td><strong>Código cliente:</strong> {{cliente.rut}}</td>
+            <td><strong>Cliente:</strong> {{cliente.nombre}}</td>
           </tr>
           <tr>
             <td><strong>RUT cliente:</strong> {{cliente.rut}}</td>
-            <td><strong>Nombre:</strong> {{cliente.nombre}}</td>
+            <td><strong>Correo:</strong> {{cliente.correo}}</td>
           </tr>
           <tr>
-            <td><strong>Correo:</strong> {{cliente.correo}}</td>
-            <td><strong>Fono:</strong> {{cliente.fono}}</td>
+            <td colspan="2"><strong>Fono:</strong> {{cliente.fono}}</td>
           </tr>
         </table>
       </div>      
@@ -109,8 +108,8 @@
         </table>
       </div>
 
-      <div class="qr">
-        <img src="{{qrCode}}" alt="Código QR Boleta" style="width:100px; height:100px;" />
+      <div class="qr" style="margin-top:20px; text-align:center;">
+        <img src="{{qrCode}}" alt="Código QR Boleta" style="width:120px; height:120px;" />
       </div>      
     </div>
   </body>

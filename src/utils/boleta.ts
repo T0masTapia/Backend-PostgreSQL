@@ -44,6 +44,7 @@ export const generarBoletaPDF = async (
   curso: Curso,
   opciones: BoletaOpciones = {}
 ): Promise<Buffer> => {
+  // 🔹 Generar QR dinámico
   const datosQR = {
     num_boleta: pago.num_boleta,
     fecha: pago.fecha.toLocaleDateString("es-CL"),
@@ -53,14 +54,21 @@ export const generarBoletaPDF = async (
   };
   const qrString = JSON.stringify(datosQR);
   const qrDataURL = await QRCode.toDataURL(qrString);
-  const rutaImagen = path.resolve("C:/Users/tomas/Desktop/Boleta/cfa.jpeg");
+
+  // 🔹 Ruta al logo dentro del repo
+  const rutaImagen = path.join(__dirname, "../assets/cfa.jpeg");
   const imagenBase64 = fs.readFileSync(rutaImagen, { encoding: "base64" });
   const imgData = `data:image/jpeg;base64,${imagenBase64}`;
 
-  const total = curso.monto + (opciones.incluirMatricula && opciones.montoMatricula ? opciones.montoMatricula : 0);
+  // 🔹 Calcular total
+  const total =
+    curso.monto +
+    (opciones.incluirMatricula && opciones.montoMatricula
+      ? opciones.montoMatricula
+      : 0);
 
-  // Cargar template HTML
-  const rutaTemplate = path.resolve(__dirname, "templates", "boletaTemplate.html");
+  // 🔹 Cargar template HTML
+  const rutaTemplate = path.join(__dirname, "../templates/boletaTemplate.html");
   const templateSource = fs.readFileSync(rutaTemplate, "utf8");
 
   // Compilar con Handlebars
@@ -81,19 +89,23 @@ export const generarBoletaPDF = async (
       nombre: curso.nombre,
       descripcion: curso.descripcion,
       duracion: curso.duracion,
-      monto: curso.monto.toLocaleString()
+      monto: curso.monto.toLocaleString(),
     },
     pago: {
-      descripcion: pago.descripcion
+      descripcion: pago.descripcion,
     },
-    matricula: opciones.incluirMatricula ? opciones.montoMatricula?.toLocaleString() : null,
+    matricula: opciones.incluirMatricula
+      ? opciones.montoMatricula?.toLocaleString()
+      : null,
     total: total.toLocaleString(),
     numBoleta: pago.num_boleta,
     qrCode: qrDataURL,
   });
 
-  // Generar PDF
-  const browser = await puppeteer.launch();
+  // 🔹 Generar PDF con Puppeteer
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // necesario en Render
+  });
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
   const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });

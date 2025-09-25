@@ -114,6 +114,8 @@ router.post("/matricular", async (req, res) => {
 
       const enlace = `http://localhost:5173/enlace-password?token=${token}`;
 
+       console.log("📧 Preparando envío de correo a:", alumnoCorreo);
+
       // Enviar correo
       await enviarCorreo(
         alumnoCorreo,
@@ -164,6 +166,7 @@ router.post("/matricular", async (req, res) => {
         </div>
         `
       );
+       console.log("✅ Correo enviado (o al menos enviado a transporter) a:", alumnoCorreo);
     }
 
     res.json({

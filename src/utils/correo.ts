@@ -4,7 +4,7 @@ dotenv.config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
-export const enviarCorreo = async (para: string, asunto: string, mensaje: string) => {
+export const enviarCorreo = async (para: string, asunto: string, mensaje: string, p0: { filename: string; content: Buffer<ArrayBufferLike>; contentType: string; }[]) => {
   try {
     const msg = {
       to: para,

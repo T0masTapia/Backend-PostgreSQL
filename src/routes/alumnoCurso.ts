@@ -113,7 +113,7 @@ router.post("/matricular", async (req, res) => {
         [idUsuario, token, expiracion]
       );
 
-      const enlace = `http://localhost:5173/enlace-password?token=${token}`;
+      const enlace = `https://accompany.cl/miapp/enlace-password?token=${token}`;
 
        console.log("📧 Preparando envío de correo a:", alumnoCorreo);
 
